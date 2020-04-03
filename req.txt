@@ -1,0 +1,12 @@
+numpy
+sklearn
+gensim
+pandas
+nltk
+tweepy
+#--------------------
+flask
+textblob
+tensorflow
+keras
+

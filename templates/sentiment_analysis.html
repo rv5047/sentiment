@@ -45,16 +45,12 @@
                         </div>
                     </div>
 
-
-
-
                     <div class="row">
 
                         <div class="col-sm-12  form-box">
                         	<div class="form-top">
                         		<div class="form-top-left">
                         			<h3>What tweets you want to see!</h3>
-                            		<p>Use the sentiment and factual filters below </p>
                         		</div>
                         		<div class="form-top-right">
                         			<i class="fa fa-twitter" style="color:#38A1F3;"></i>
@@ -62,46 +58,24 @@
                             </div>
 
                             <div class="form-bottom">
-			                    <form role="form" id="form" class="login-form">
-			                    	<div class="form-group">
-			                    		<label class="sr-only" for="form-username">Username</label>
-			                        	<input type="text" name="tweet_search" placeholder="Enter a search topic" class="form-username form-control" id="form-username">
-			                        </div>
+			                    <form role="form" id="form">
+                                    <div class="row">
+    			                    	<div class="col-sm-10">
+    			                        	<input type="text" name="tweet_search" placeholder="Enter a search topic" class="form-search" id="form-search">
+    			                        </div>
 
-                                    <div class="row search_tweets">
-                                         <div class="col-sm-offset-3 col-sm-6">
-                                               <button id="search_btn" class="btn">Search Tweets</button>
-                                         </div>
+                                        <div class="col-sm-2">
+                                            <input type="text" name="tweet_count" placeholder="count" class="form-count" id="form-count">
+                                        </div>
                                     </div>
-
-                                    <div class="row reset_filter">
-                                         <div class="col-sm-offset-3 col-sm-6">
-                                               <button data-toggle="tooltip" data-placement="top" title="Show all Tweets"  class="btn">Reset Filters</button>
-                                         </div>
-                                    </div>
-
 
                                     <div class="row">
-                                        <div class="col-sm-4 col-sm-offset-1">
-                                            <div class="row">
-                                                 <div class="col-sm">
-                                                      <button  data-toggle="tooltip" data-placement="left" title="Show only Positive Tweets" class="btn" id="psenti">Positive Tweets</button>
-                                                 </div>
-                                                 <div class="col-sm">
-                                                        <button  data-toggle="tooltip" data-placement="left" title="Show only Negative Tweets"  class="btn" id="nsenti">Negative Tweets</button>
-                                                 </div>
-                                            </div>
+                                        <div class="col-sm-6">
+                                            <button id="search_btn" class="btn">Search Tweets</button>
                                         </div>
 
-                                        <div class="col-sm-4 col-sm-offset-2">
-                                            <div class="row">
-                                                 <div class="col-sm">
-                                                      <button data-toggle="tooltip" data-placement="left" title="Tweets which are Opinion"  id="opi" class="btn">Opinion Tweet</button>
-                                                 </div>
-                                                 <div class="col-sm">
-                                                        <button  data-toggle="tooltip" data-placement="left" title="Tweets which are factual"  id="fac" class="btn">Factual Tweet</button>
-                                                 </div>
-                                            </div>
+                                        <div class="col-sm-6">
+                                            <button data-toggle="tooltip" data-placement="top" title="Show all Tweets"  class="btn">Reset Filters</button>
                                         </div>
                                     </div>
 			                    </form>
@@ -109,17 +83,19 @@
                         </div>
                     </div>
 
-                    <div id="search_result">
-                        <ol id="search_list">
+                    <div id="search_result" class="table-responsive">
+                        <!--ol id="search_list">
 
-                        </ol>
+                        </ol-->
+                        <table class="table" id="search_list">
+                        </table>    
                     </div>
 
                     <!-- <div class="row">
                         <div class="col-sm-6 col-sm-offset-3 social-login">
                         	<h3>Source Code Available at :</h3>
                         	<div class="social-login-buttons">
-	                        	<a class="btn btn-link-1 btn-link-1-facebook" href="https://github.com/rbhatia46">
+	                        	<a class="btn btn-link-1 btn-link-1-facebook" href="">
 	                        		<i class="fa fa-github"></i> Github
 	                        	</a>
 	                        	
@@ -137,12 +113,8 @@
         <script src="../static/bootstrap/js/bootstrap.min.js"></script>
         <script src="../static/js/jquery.backstretch.min.js"></script>
         <script src="../static/js/scripts.js"></script>
-        <script src="{{ url_for('static',filename='index.js') }}"></script>
+        <script src="{{ url_for('static',filename='sentiment_analysis.js') }}"></script>
         <!-- script src="../static/index.js"></script -->
-
-        <!--[if lt IE 10]>
-            <script src="static/js/placeholder.js"></script>
-        <![endif]-->
 
     </body>
 
