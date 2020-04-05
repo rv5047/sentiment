@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#search_btn').onclick = () => {
          document.querySelector('#search_list').innerHTML="";
-
+         document.querySelector("#donutchart").innerHTML="";
         // Initialize new request
         const request = new XMLHttpRequest();
         const search_query = document.querySelector('#form-search').value;
@@ -17,6 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update the result div
             if (data.success) {
+                google.charts.load("current", {packages:["corechart"]});
+                const d = google.visualization.arrayToDataTable([
+                        ['Sentiment', 'Number'],
+                        ['Negative', data.count[0]],
+                        ['Positive', data.count[1]],
+                        ['Neutral', data.count[2]]
+                    ]);
+
+                const options = {
+                    title: "Sentiment Wheeel",
+                    pieHole : 0.4,
+                }
+
+                const chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+                chart.draw(d, options);
+
                 const thead = document.createElement('thead');
                 const tbody = document.createElement('tbody');
                 const th = document.createElement('th');

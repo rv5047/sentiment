@@ -9,13 +9,13 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 
 #================================================================== Sentiment Analysis ==================================================================
-"""
+
 from sentiment_analysis.utility_functions import load_embeddings
 from keras.models import load_model
 from nltk.tokenize import RegexpTokenizer
 #from matplotlib import pyplot as plt
 import re
-"""
+
 
 #================================================================== Topical Modeling ==================================================================
 from topical_clustering.capture_sentiment import capture_sentiment
@@ -139,7 +139,7 @@ sentiment_analyzer = SentimentAnalyzer()
 
 api = twitter_client.get_twitter_client_api()
 
-"""
+
 path=''
 gloveFile = path+'sentiment_analysis/Data/glove/glove_6B_100d.txt'
 weight_matrix, word_idx = load_embeddings(gloveFile)
@@ -149,7 +149,6 @@ weight_path = path +'sentiment_analysis/model/best_model.hdf5'
 loaded_model = load_model(weight_path)
 #print("model loaded")
 #loaded_model.summary()
-"""
 
 #================================================================== Saving Tweets to File ==================================================================
 i = int(0)
@@ -177,7 +176,7 @@ nav = [{'name': 'Sentiment Analysis', 'url': '/sentiment_analysis'},
 #home page
 @app.route("/")
 def home():
-    return render_template('topical_clustering.html',nav=nav)
+    return render_template('sentiment_analysis.html',nav=nav)
 
 
 #navigation to all pages
@@ -227,10 +226,10 @@ def search():
     n_neutrals = int(0)
 
     for score in scores:
-        if score<=0.35:
+        if score<=0.4:
             status.append('Negative')
             n_negatives= n_negatives+1
-        elif score>=0.65:
+        elif score>=0.6:
             status.append('Positive')
             n_positives=n_positives+1
         else :
@@ -238,8 +237,8 @@ def search():
             n_neutrals=n_neutrals+1
 
     sentiments = [(tweets[i],scores[i],status[i]) for i in range(len(tweets))] 
-
-    return jsonify({"success":True,"tweets":sentiments[:50]})
+    sentiment_count = [n_negatives,n_positives,n_neutrals]
+    return jsonify({"success":True,"tweets":sentiments[:50],"count":sentiment_count})
 
 #================================================================== Topical Modeling ==================================================================
 # fetch tweets in txt file
