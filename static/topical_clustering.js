@@ -12,10 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
-        // Initialize new request
-        //const request = new XMLHttpRequest();
-        //request.open('POST', '/delete');
-
         // Callback function for when request completes
         request.onload = () => {
 
@@ -23,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = JSON.parse(request.responseText);
 
             if (data.success) {
-                window.alert("deleted");
+                window.alert("Deleted");
             }
             else {
             }
@@ -42,23 +38,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const request = new XMLHttpRequest();
         const search_query = document.querySelector('#form-search').value;
         request.open('POST', '/fetch_tweets');
+        
+        if(search_query.trim()===""){
+            window.alert("Some of the field is missing !!!");
+        }
+        else{
+            const data = new FormData();
+            data.append('search_query', search_query);
+
+            // Send request
+            request.send(data);
+        }
 
         request.onload = () => {
 
             const data = JSON.parse(request.responseText);
 
             if (data.success) {
-                window.alert("completes");
+                window.alert("Completed");
             }
             else {
+                window.alert("Check you Internet Connection !!!")
             }
         }
-
-        const data = new FormData();
-        data.append('search_query',search_query);
-        request.send(data);        
+      
         return false;
-
     };
 
     document.querySelector('#topical_modeling').onclick = () => {
@@ -101,8 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 document.querySelector('#search_list').append(tbody);
             }
-            else {
-                window.alert("file not found !!!")
+            else if (data.success == false){
+                window.alert("File not found !!!")
+            }
+            else{
+                window.alert("File size is less..\nPlease click Fetch Tweets button")
             }
         }
 

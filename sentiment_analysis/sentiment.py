@@ -10,7 +10,6 @@ from tweepy import Stream
 import pandas as pd
 from matplotlib import pyplot as plt
 import re
-import csv
 
 '''
 consumer_key = '5iqKoUCY3u2J5daVwBKzPz6Nl'
@@ -38,15 +37,13 @@ class TwitterClient():
     def get_twitter_client_api(self):
         return self.twitter_client
 
-class TweetCleaner():
+class TweetAnalyzer():
     def clean_tweets(self, tweets):
         clean_tweets = []
         for tweet in tweets:
             clean_tweets.append(' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split()))
         return clean_tweets
 
-    def clean_tweet(self, tweet):
-        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
 
 class SentimentAnalyzer():
 
@@ -57,107 +54,51 @@ class SentimentAnalyzer():
             live_list_np = np.zeros((56,1))
             # split the sentence into its words and remove any punctuations.
             tokenizer = RegexpTokenizer(r'\w+')
-            '''labels = np.array(['1','2','3','4','5','6','7','8','9','10'], dtype = "int")'''
+            labels = np.array(['1','2','3','4','5','6','7','8','9','10'], dtype = "int")
             data_sample_list = tokenizer.tokenize(data)
-
-            #print("data sample list : ",data_sample_list)
 
             #word_idx['I']
             # get index for the live stage
             data_index = np.array([word_idx[word.lower()] if word.lower() in word_idx else 0 for word in data_sample_list])
-            #print("data index : ",data_index)
             data_index_np = np.array(data_index)
-            #print("data index np : ",data_index_np)
 
             # padded with zeros of length 56 i.e maximum length
             padded_array = np.zeros(56) # use the def maxSeqLen(training_data) function to detemine the padding length for your data
             padded_array[: data_index_np.shape[0]] = data_index_np
-            #print("padded array : ",padded_array)
             data_index_np_pad = padded_array.astype(int)
-            #print("data index np pad : ",data_index_np_pad)
             live_list.append(data_index_np_pad)
             live_list_np = np.asarray(live_list)
             type(live_list_np)
 
-            #print("live list np : ",live_list_np)
             # get score from the model
             score = trained_model.predict(live_list_np, batch_size=1, verbose=0)
             #print (score)
-            #print("score : ",score)
+
             single_score = np.round(np.argmax(score)/10, decimals=2) # maximum of the array i.e single band
-            #print("single score : ", single_score)
 
             # weighted score of top 3 bands
             top_3_index = np.argsort(score)[0][-3:]
-            #print("top 3 : ", top_3_index)
             top_3_scores = score[0][top_3_index]
-            #print("tp 3 scores : ",top_3_scores)
             top_3_weights = top_3_scores/np.sum(top_3_scores)
-            #print("top 3 weights : ", top_3_weights)
             single_score_dot = np.round(np.dot(top_3_index, top_3_weights)/10, decimals = 2)
 
             #print (single_score)
             sentiment_score.append(single_score_dot)
         return sentiment_score
 
-def fetch_live():
+
+if __name__ == '__main__':
+
     twitter_client = TwitterClient()
+    tweet_analyzer = TweetAnalyzer()
+    sentiment_analyzer = SentimentAnalyzer()
+
     api = twitter_client.get_twitter_client_api()
     query = input('Enter Keyword : ')
     count = int(input('Enter number of tweets to fetch : '))
     fetched_tweets =  api.search(query, count = count,lang ='en')
     fetched_tweets = [tweet.text for tweet in fetched_tweets]
-    tweet_cleaner = TweetCleaner()
-    tweets = tweet_cleaner.clean_tweets(fetched_tweets)
-    return tweets
-
-def open_csv(filename):
-    with open(filename,encoding="utf8") as f:
-        tweets_before_filter = []
-        tweet_cleaner = TweetCleaner()
-        c = csv.reader(f)
-        index = 4   #column number which has tweets in csv file, start from 0
-        next(c)
-
-        #f.seek(0)
-        next(c)
-        query = input("Enter keyword to be searched in csv file of tweets : ")  #if nothing to be searched keep blank
-        for row in c:
-            if query in row[index]:
-                tweets_before_filter.append(row[index])
-
-        if(len(tweets_before_filter)==0):
-            print('No tweets Found, search another tweet')
-
-
-        tweets_after_filter = tweet_cleaner.clean_tweets(tweets_before_filter)
-        write_to_csv('Data/output/output.csv',tweets_before_filter,tweets_after_filter)
-        tweets = []
-        for tweet in tweets_after_filter:
-            if len(tweet.split(' '))<56:
-                tweets.append(tweet)
-        
-        return tweets
-
-def write_to_csv(filename,col1,col2):
-    with open(filename,'w') as f:
-        csvwriter = csv.writer(f)
-        fields = ['id','Tweet','Sentiment']
-        csvwriter.writerow(fields)
-        for i in range(len(col1)):
-            csvwriter.writerow([i,col1[i],col2[i]])
-        print('File written successfully')
-
-if __name__ == '__main__':
-
-    flag = False           # True for Twitter live fetch, False for csv file
-    tweets=[]
-    if flag:
-        tweets = fetch_live()
-    else:
-        tweets = open_csv('Data/twcs.csv')
-    
-    sentiment_analyzer = SentimentAnalyzer()
+    tweets = tweet_analyzer.clean_tweets(fetched_tweets)
 
     path=''
     gloveFile = path+'Data/glove/glove_6B_100d.txt'
@@ -187,17 +128,19 @@ if __name__ == '__main__':
             status.append('Neutral')
             n_neutrals=n_neutrals+1
 
+    """
     sentiment_Data = pd.DataFrame(data=[tweet for tweet in tweets], columns=['tweets'])
     #sentiment_Data['original tweets'] = np.array([o_tweet for o_tweet in fetched_tweets])
     sentiment_Data['score'] = np.array([score for score in scores])
     sentiment_Data['status'] = np.array([status for status in status])
     pd.set_option('display.max_colwidth', -1)
-    #write_to_csv('Data/Output/output.csv',sentiment_Data.tweets.tolist(),sentiment_Data.status.tolist())
+    """
+    sentiment_Data = [(tweets[i],scores[i],status[i]) for i in range(len(tweets))]
 
     #sentiments = {tweets[i]:scores[i] for i in range(len(tweets))}
     print(sentiment_Data)
     
-    #print(n_negatives,n_positives,n_neutrals)
+    print(n_negatives,n_positives,n_neutrals)
     values = [n_negatives,n_positives,n_neutrals]
     labels = ['Negative', 'Positive', 'Neutral']
     colors = ['red', 'green', 'blue']

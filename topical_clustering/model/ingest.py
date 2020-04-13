@@ -10,3 +10,5 @@ def ingest(file):
     df.drop('index', axis=1, inplace=True)
     print(df.shape)
     return df
+
+#ingest("../Data/SentimentAnalysisDataset.csv")

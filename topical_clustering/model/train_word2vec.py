@@ -4,6 +4,7 @@ from gensim.models.word2vec import Word2Vec
 from gensim.models.phrases import Phraser, Phrases
 from gensim.models.doc2vec import LabeledSentence
 
+
 from ingest import ingest
 from tweet_tokenize import tokenize
 

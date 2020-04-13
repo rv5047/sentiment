@@ -1,7 +1,3 @@
-l = ["ravi","patel"]
+import os
 
-s = ","
-
-s1 = s.join(l)
-
-print(s1)
+print(os.stat("./topical_clustering/Data/output.txt").st_size/(1024*1024))
