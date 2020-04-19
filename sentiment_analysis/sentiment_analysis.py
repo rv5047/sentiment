@@ -41,10 +41,69 @@ class TwitterClient():
 class TweetCleaner():
     def clean_tweets(self, tweets):
         clean_tweets = []
+        abbr_dict = {
+            "what's":"what is",
+            "what're":"what are",
+            "who's":"who is",
+            "who're":"who are",
+            "where's":"where is",
+            "where're":"where are",
+            "when's":"when is",
+            "when're":"when are",
+            "how's":"how is",
+            "how're":"how are",
+
+            "i'm":"i am",
+            "we're":"we are",
+            "you're":"you are",
+            "they're":"they are",
+            "it's":"it is",
+            "he's":"he is",
+            "she's":"she is",
+            "that's":"that is",
+            "there's":"there is",
+            "there're":"there are",
+
+            "i've":"i have",
+            "we've":"we have",
+            "you've":"you have",
+            "they've":"they have",
+            "who've":"who have",
+            "would've":"would have",
+            "not've":"not have",
+
+            "i'll":"i will",
+            "we'll":"we will",
+            "you'll":"you will",
+            "he'll":"he will",
+            "she'll":"she will",
+            "it'll":"it will",
+            "they'll":"they will",
+
+            "isn't":"is not",
+            "wasn't":"was not",
+            "aren't":"are not",
+            "weren't":"were not",
+            "can't":"can not",
+            "couldn't":"could not",
+            "don't":"do not",
+            "didn't":"did not",
+            "shouldn't":"should not",
+            "wouldn't":"would not",
+            "doesn't":"does not",
+            "haven't":"have not",
+            "hasn't":"has not",
+            "hadn't":"had not",
+            "won't":"will not",
+            '\s+':' ', # replace multi space with one single space
+        }
         for tweet in tweets:
+            print(tweet)
+            for x,y in abbr_dict.items():
+                tweet = tweet.replace(x,y)
+            print(tweet)
             clean_tweets.append(' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split()))
         return clean_tweets
-
     def clean_tweet(self, tweet):
         return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
 
@@ -105,7 +164,7 @@ def fetch_live():
     api = twitter_client.get_twitter_client_api()
     query = input('Enter Keyword : ')
     count = int(input('Enter number of tweets to fetch : '))
-    fetched_tweets =  api.search(query, count = count,lang ='en')
+    fetched_tweets =  api.search(query + ' -filter:retweets -RT', count = count,lang ='en')
     fetched_tweets = [tweet.text for tweet in fetched_tweets]
     tweet_cleaner = TweetCleaner()
     tweets = tweet_cleaner.clean_tweets(fetched_tweets)
@@ -131,7 +190,7 @@ def open_csv(filename):
 
 
         tweets_after_filter = tweet_cleaner.clean_tweets(tweets_before_filter)
-        write_to_csv('Data/output/output.csv',tweets_before_filter,tweets_after_filter)
+        #write_to_csv('Data/output/output.csv',tweets_before_filter,tweets_after_filter)
         tweets = []
         for tweet in tweets_after_filter:
             if len(tweet.split(' '))<56:
@@ -156,8 +215,8 @@ if __name__ == '__main__':
         tweets = fetch_live()
     else:
         tweets = open_csv('Data/twcs.csv')
-    
-    sentiment_analyzer = SentimentAnalyzer()
+
+    tweets = tweet_cleaner.clean_tweets(tweets)
 
     path=''
     gloveFile = path+'Data/glove/glove_6B_100d.txt'
