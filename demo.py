@@ -11,14 +11,14 @@ from tweepy import Stream
 import requests
 
 #================================================================== Sentiment Analysis ==================================================================
-
+"""
 from sentiment_analysis.utility_functions import load_embeddings
 from keras.models import load_model
 from nltk.tokenize import RegexpTokenizer
 #from matplotlib import pyplot as plt
 import re
 import csv
-
+"""
 #================================================================== Topical Modeling ==================================================================
 
 from topical_clustering.capture_sentiment import capture_sentiment
@@ -274,7 +274,7 @@ def check_internet():
 		return False       
 
 #================================================================== Vector and Model Loading ==================================================================
-
+"""
 path=''
 gloveFile = path+'sentiment_analysis/Data/glove/glove_6B_100d.txt'
 weight_matrix, word_idx = load_embeddings(gloveFile)
@@ -284,7 +284,7 @@ weight_path = path +'sentiment_analysis/model/best_model.hdf5'
 loaded_model = load_model(weight_path)
 #print("model loaded")
 #loaded_model.summary()
-
+"""
 #================================================================== Saving Tweets to txt File =================================================================
 
 class StdOutListener(StreamListener):
@@ -311,7 +311,7 @@ nav = [{'name': 'Sentiment Analysis', 'url': '/sentiment_analysis'},
 #home page
 @app.route("/")
 def home():
-	return render_template('sentiment_analysis.html',nav=nav)
+	return render_template('topical_clustering.html',nav=nav)
 
 
 #navigation to all pages
@@ -541,4 +541,4 @@ def topical_modeling():
 	return jsonify({"success":True,"topic":topics_list})
 
 #run flask app
-app.run(port=3000,threaded=False)
+app.run(port=3000,debug=True)

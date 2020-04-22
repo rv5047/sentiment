@@ -1,3 +1,8 @@
-import os
+from nltk.corpus import stopwords
 
-print(os.stat("./topical_clustering/Data/output.txt").st_size/(1024*1024))
+stop = stopwords.words("english")
+
+if "don\'t" not in stop:
+	print("yes")
+else:
+	print("no")
