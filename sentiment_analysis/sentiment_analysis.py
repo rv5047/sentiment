@@ -178,7 +178,7 @@ def fetch_live():
     query = input('Enter Keyword : ')
     count = int(input('Enter number of tweets to fetch : '))
     fetched_tweets =  api.search(query + ' -filter:retweets -RT', count = count,lang ='en')
-    fetched_tweets = [tweet.text for tweet in fetched_tweets]
+    fetched_tweets = [tweet.text.lower() for tweet in fetched_tweets]
     tweet_cleaner = TweetCleaner()
     tweets = tweet_cleaner.clean_tweets(fetched_tweets)
     return tweets
@@ -194,9 +194,11 @@ def open_csv(filename):
         #f.seek(0)
         next(c)
         query = input("Enter keyword to be searched in csv file of tweets : ")  #if nothing to be searched keep blank
+        query = query.lower()
+        
         for row in c:
-            if query in row[index]:
-                tweets_before_filter.append(row[index])
+            if query in row[index].lower():
+                tweets_before_filter.append(row[index].lower())
 
         if(len(tweets_before_filter)==0):
             print('No tweets Found, search another tweet')
