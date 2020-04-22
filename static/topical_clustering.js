@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#delete_tweets').onclick = () => {
-        document.querySelector('#search_list').innerHTML="";
+        document.querySelector('#search_result').innerHTML="";
 
         const request = new XMLHttpRequest();
 
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.querySelector('#fetch_tweets').onclick = () => {
-        document.querySelector('#search_list').innerHTML="";
+        document.querySelector('#search_result').innerHTML="";
 
         const request = new XMLHttpRequest();
         const search_query = document.querySelector('#form-search').value;
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.querySelector('#topical_modeling').onclick = () => {
-        document.querySelector('#search_list').innerHTML="";
+        document.querySelector('#search_result').innerHTML="";
 
         const request = new XMLHttpRequest();
         request.open('POST', '/topical_modeling');
@@ -75,35 +75,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = JSON.parse(request.responseText);
 
+            const paths = [['./static/img/topic_clustering/cloud0.png', './static/img/topic_clustering/bar0.png'], 
+                           ['./static/img/topic_clustering/cloud1.png', './static/img/topic_clustering/bar1.png'],
+                           ['./static/img/topic_clustering/cloud2.png', './static/img/topic_clustering/bar2.png'],
+                           ['./static/img/topic_clustering/cloud3.png', './static/img/topic_clustering/bar3.png'],
+                           ['./static/img/topic_clustering/cloud4.png', './static/img/topic_clustering/bar4.png']];
+
             if (data.success) {
-                const thead = document.createElement('thead');
-                const tbody = document.createElement('tbody');
-                const th = document.createElement('th');
-                const th1 = document.createElement('th');
-                const th2 = document.createElement('th');
-                const tr = document.createElement('tr');
-
-                th.innerHTML = 'Topic #';
-                tr.append(th);
-                th1.innerHTML = 'Words';
-                tr.append(th1);
-
-                thead.append(tr);
-                document.querySelector('#search_list').append(thead);
-
-                for(var i = 0; i<data.topic.length ; i++){
-
-                    const tr = document.createElement('tr');
-                    const td = document.createElement('td');
-                    const td1 = document.createElement('td');
-
-                    td.innerHTML = i;
-                    tr.append(td);
-                    td1.innerHTML = data.topic[i];
-                    tr.append(td1);
-                    tbody.append(tr);
+                function setAttributes(el, attrs) {
+                  for(var key in attrs) {
+                    el.setAttribute(key, attrs[key]);
+                  }
                 }
-                document.querySelector('#search_list').append(tbody);
+
+                for(var i=0; i<5; i++){
+                    const div = document.createElement('div');
+                    const div1 = document.createElement('div');
+                    const div2 = document.createElement('div');
+                    const img = document.createElement('img');
+                    const img1 = document.createElement('img');
+
+                    div.classList.add('row');
+                    div1.classList.add('col-sm-6');
+                    div2.classList.add('col-sm-6');
+
+                    div.setAttribute('id', 'image');
+                    setAttributes(img,{'src': paths[i][0], 'width' : '500', 'height' : '500'});
+                    setAttributes(img1,{'src':paths[i][1], 'width' : '500', 'height' : '500'});
+
+                    div1.append(img);
+                    div2.append(img1);
+                    div.append(div1);
+                    div.append(div2);
+                    document.querySelector('#search_result').append(div);
+                }
             }
             else if (data.success == false){
                 window.alert("File not found !!!")
