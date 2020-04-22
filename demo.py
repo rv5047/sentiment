@@ -9,16 +9,20 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 import requests
+from nltk.corpus import stopwords
+from matplotlib import pyplot as plt
+from wordcloud import WordCloud, STOPWORDS
+import matplotlib.colors as mcolors
 
 #================================================================== Sentiment Analysis ==================================================================
-"""
+
 from sentiment_analysis.utility_functions import load_embeddings
 from keras.models import load_model
 from nltk.tokenize import RegexpTokenizer
-#from matplotlib import pyplot as plt
+from nltk.tokenize import word_tokenize
 import re
 import csv
-"""
+
 #================================================================== Topical Modeling ==================================================================
 
 from topical_clustering.capture_sentiment import capture_sentiment
@@ -33,11 +37,6 @@ import json
 from gensim import corpora
 from sklearn.preprocessing import scale
 import os
-from matplotlib import pyplot as plt
-from wordcloud import WordCloud, STOPWORDS
-import matplotlib.colors as mcolors
-from nltk.corpus import stopwords
-stop_words = stopwords.words("english")
 from collections import Counter
 
 #================================================================== Twitter Keys ==================================================================
@@ -99,71 +98,84 @@ class TwitterClient():
 #================================================================== Tweet Cleaning ==================================================================
 
 class TweetCleaner():
-    def clean_tweets(self, tweets):
-        clean_tweets = []
-        abbr_dict = {
-            "what's":"what is",
-            "what're":"what are",
-            "who's":"who is",
-            "who're":"who are",
-            "where's":"where is",
-            "where're":"where are",
-            "when's":"when is",
-            "when're":"when are",
-            "how's":"how is",
-            "how're":"how are",
+	def removeStopWords(self,tweets):
+		clean_tweets = []
+		stop_words = set(stopwords.words('english'))
 
-            "i'm":"i am",
-            "we're":"we are",
-            "you're":"you are",
-            "they're":"they are",
-            "it's":"it is",
-            "he's":"he is",
-            "she's":"she is",
-            "that's":"that is",
-            "there's":"there is",
-            "there're":"there are",
+		for tweet in tweets:
+			words = tweet.split(" ")
+			clean_tweet = " ".join([word for word in words if word not in stop_words])
+			clean_tweets.append(clean_tweet)
 
-            "i've":"i have",
-            "we've":"we have",
-            "you've":"you have",
-            "they've":"they have",
-            "who've":"who have",
-            "would've":"would have",
-            "not've":"not have",
+		return clean_tweets
 
-            "i'll":"i will",
-            "we'll":"we will",
-            "you'll":"you will",
-            "he'll":"he will",
-            "she'll":"she will",
-            "it'll":"it will",
-            "they'll":"they will",
+	def clean_tweets(self, tweets):
+		clean_tweets = []
+		abbr_dict = {
+			"what's":"what is",
+			"what're":"what are",
+			"who's":"who is",
+			"who're":"who are",
+			"where's":"where is",
+			"where're":"where are",
+			"when's":"when is",
+			"when're":"when are",
+			"how's":"how is",
+			"how're":"how are",
 
-            "isn't":"is not",
-            "wasn't":"was not",
-            "aren't":"are not",
-            "weren't":"were not",
-            "can't":"can not",
-            "couldn't":"could not",
-            "don't":"do not",
-            "didn't":"did not",
-            "shouldn't":"should not",
-            "wouldn't":"would not",
-            "doesn't":"does not",
-            "haven't":"have not",
-            "hasn't":"has not",
-            "hadn't":"had not",
-            "won't":"will not",
-            '\s+':' ', # replace multi space with one single space
-        }
-        for tweet in tweets:
-            for x,y in abbr_dict.items():
-                tweet = tweet.replace(x,y)
-            clean_tweets.append(' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split()))
-        return clean_tweets
-    def clean_tweet(self, tweet):
-        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
+			"i'm":"i am",
+			"we're":"we are",
+			"you're":"you are",
+			"they're":"they are",
+			"it's":"it is",
+			"he's":"he is",
+			"she's":"she is",
+			"that's":"that is",
+			"there's":"there is",
+			"there're":"there are",
+
+			"i've":"i have",
+			"we've":"we have",
+			"you've":"you have",
+			"they've":"they have",
+			"who've":"who have",
+			"would've":"would have",
+			"not've":"not have",
+
+			"i'll":"i will",
+			"we'll":"we will",
+			"you'll":"you will",
+			"he'll":"he will",
+			"she'll":"she will",
+			"it'll":"it will",
+			"they'll":"they will",
+
+			"isn't":"is not",
+			"wasn't":"was not",
+			"aren't":"are not",
+			"weren't":"were not",
+			"can't":"cannot",
+			"couldn't":"could not",
+			"don't":"do not",
+			"didn't":"did not",
+			"shouldn't":"should not",
+			"wouldn't":"would not",
+			"doesn't":"does not",
+			"haven't":"have not",
+			"hasn't":"has not",
+			"hadn't":"had not",
+			"won't":"will not",
+			'\s+':' ', # replace multi space with one single space
+		}
+		for tweet in tweets:
+			print(tweet)
+			for x,y in abbr_dict.items():
+				tweet = tweet.replace(x,y)
+			print(tweet)
+			clean_tweets.append(' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split()))
+		return clean_tweets
+	def clean_tweet(self, tweet):
+		return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
 
 #================================================================== Sentiment Analysis ==================================================================
 
@@ -280,7 +292,7 @@ def check_internet():
 		return False       
 
 #================================================================== Vector and Model Loading ==================================================================
-"""
+
 path=''
 gloveFile = path+'sentiment_analysis/Data/glove/glove_6B_100d.txt'
 weight_matrix, word_idx = load_embeddings(gloveFile)
@@ -290,7 +302,7 @@ weight_path = path +'sentiment_analysis/model/best_model.hdf5'
 loaded_model = load_model(weight_path)
 #print("model loaded")
 #loaded_model.summary()
-"""
+
 #================================================================== Saving Tweets to txt File =================================================================
 
 class StdOutListener(StreamListener):
@@ -317,7 +329,7 @@ nav = [{'name': 'Sentiment Analysis', 'url': '/sentiment_analysis'},
 #home page
 @app.route("/")
 def home():
-	return render_template('topical_clustering.html',nav=nav)
+	return render_template('sentiment_analysis.html',nav=nav)
 
 
 #navigation to all pages
@@ -341,6 +353,8 @@ def comparison():
 
 #================================================================== Live Sentiment Analysis ==================================================================
 
+stop_words = stopwords.words("english")
+
 @app.route("/live_tweets",methods=["POST"])
 def live_tweets():
 	search_tweet = request.form.get("search_query")
@@ -354,14 +368,14 @@ def live_tweets():
 		return jsonify({"success":False})
 
 	#print(len(tweets))
-
+	tweet_cleaner  =TweetCleaner()
 	sentiment_analyzer = SentimentAnalyzer()
 
 	scores = sentiment_analyzer.analysis(loaded_model,tweets, word_idx)
-
-	#negative : 0 - 0.35
-	#neutral : 0.35 - 0.65
-	#positive : 0.65 - 1
+	tweets_without_stopwords = tweet_cleaner.removeStopWords(tweets)
+	#negative : 0 - 0.4
+	#neutral : 0.4 - 0.6
+	#positive : 0.6 - 1
 	
 	status = []
 	n_positives = int(0)
@@ -378,6 +392,27 @@ def live_tweets():
 		else :
 			status.append('Neutral')
 			n_neutrals=n_neutrals+1
+
+	values = [n_negatives,n_positives,n_neutrals]
+	labels = ['Negative', 'Positive', 'Neutral']
+	colors = ['red', 'green', 'blue']
+	explode =(0.1, 0.1, 0.1)
+	plt.pie(values,explode = explode,labels=labels,colors=colors, startangle=140, autopct='%1.1f%%')
+	plt.savefig("./static/img/sentiment_analysis/pie.png")
+
+	wordcloud = WordCloud(width = 400, height = 400, 
+				background_color ='cyan', 
+				stopwords = stop_words, 
+				min_font_size = 20,
+				max_words = 20,
+				colormap = 'gist_rainbow',
+				prefer_horizontal = 0.5).generate(tweets_without_stopwords) 
+					   
+	plt.figure(figsize = (8, 8), facecolor = None) 
+	plt.imshow(wordcloud) 
+	plt.axis("off") 
+	plt.tight_layout(pad = 0)
+	plt.savefig("./static/img/sentiment_analysis/cloud.png")
 
 	sentiments = [(tweets[i],scores[i],status[i]) for i in range(len(tweets))] 
 	sentiment_count = [n_negatives,n_positives,n_neutrals]
@@ -396,10 +431,11 @@ def offline_tweets():
 	if(len(tweets)==0):
 		return jsonify({"success":False})
 
+	tweet_cleaner  =TweetCleaner()
 	sentiment_analyzer = SentimentAnalyzer()
 
 	scores = sentiment_analyzer.analysis(loaded_model,tweets, word_idx)
-
+	tweets_without_stopwords = tweet_cleaner.removeStopWords(tweets)
 	#negative : 0 - 0.35
 	#neutral : 0.35 - 0.65
 	#positive : 0.65 - 1
@@ -419,6 +455,27 @@ def offline_tweets():
 		else :
 			status.append('Neutral')
 			n_neutrals=n_neutrals+1
+
+		values = [n_negatives,n_positives,n_neutrals]
+	labels = ['Negative', 'Positive', 'Neutral']
+	colors = ['red', 'green', 'blue']
+	explode =(0.1, 0.1, 0.1)
+	plt.pie(values,explode = explode,labels=labels,colors=colors, startangle=140, autopct='%1.1f%%')
+	plt.savefig("./static/img/sentiment_analysis/pie.png")
+
+	wordcloud = WordCloud(width = 400, height = 400, 
+				background_color ='cyan', 
+				stopwords = stop_words, 
+				min_font_size = 20,
+				max_words = 20,
+				colormap = 'gist_rainbow',
+				prefer_horizontal = 0.5).generate(tweets_without_stopwords) 
+					   
+	plt.figure(figsize = (8, 8), facecolor = None) 
+	plt.imshow(wordcloud) 
+	plt.axis("off") 
+	plt.tight_layout(pad = 0)
+	plt.savefig("./static/img/sentiment_analysis/cloud.png")
 
 	sentiments = [(tweets[i],scores[i],status[i]) for i in range(len(tweets))] 
 	sentiment_count = [n_negatives,n_positives,n_neutrals]
@@ -539,7 +596,7 @@ def topical_modeling():
 		width = 400,
 		height = 400,
 		max_words = 10,
-		colormap = 'tab10',
+		colormap = 'gist_rainbow',
 		prefer_horizontal = 0.1)
 
 	topics = ldamodel.show_topics(num_topics=5, formatted = False, num_words=10)
@@ -581,4 +638,4 @@ def topical_modeling():
 	return jsonify({"success":True})
 
 #run flask app
-app.run(port=3000,debug=True)
+app.run(port=3000,threaded=True)
