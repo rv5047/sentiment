@@ -2,6 +2,8 @@ import utility_functions as uf
 import numpy as np
 from keras.models import load_model
 from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 from tweepy import API 
 from tweepy import Cursor
 from tweepy.streaming import StreamListener
@@ -39,6 +41,17 @@ class TwitterClient():
         return self.twitter_client
 
 class TweetCleaner():
+    def removeStopWords(self,tweets):
+        clean_tweets = []
+        stop_words = set(stopwords.words('english'))
+
+        for tweet in tweets:
+            words = tweet.split(" ")
+            clean_tweet = " ".join([word for word in words if word not in stop_words])
+            clean_tweets.append(clean_tweet)
+
+        return clean_tweets
+
     def clean_tweets(self, tweets):
         clean_tweets = []
         abbr_dict = {
@@ -84,7 +97,7 @@ class TweetCleaner():
             "wasn't":"was not",
             "aren't":"are not",
             "weren't":"were not",
-            "can't":"can not",
+            "can't":"cannot",
             "couldn't":"could not",
             "don't":"do not",
             "didn't":"did not",
@@ -207,16 +220,25 @@ def write_to_csv(filename,col1,col2):
             csvwriter.writerow([i,col1[i],col2[i]])
         print('File written successfully')
 
+def allWordsToTxt(filename, data):
+    with open(filename,'w') as f:
+        for tweet in data:
+            f.write(tweet + " ")
+
 if __name__ == '__main__':
 
-    flag = False           # True for Twitter live fetch, False for csv file
+    flag = True           # True for Twitter live fetch, False for csv file
     tweets=[]
     if flag:
         tweets = fetch_live()
     else:
         tweets = open_csv('Data/twcs.csv')
 
-    tweets = tweet_cleaner.clean_tweets(tweets)
+    tweet_cleaner = TweetCleaner()
+    sentiment_analyzer = SentimentAnalyzer()
+
+    tweets_without_stopwords = tweet_cleaner.removeStopWords(tweets)
+    allWordsToTxt('Data/all_words.txt',tweets_without_stopwords)
 
     path=''
     gloveFile = path+'Data/glove/glove_6B_100d.txt'
