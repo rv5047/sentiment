@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from tweepy import API 
 from tweepy import Cursor
+from nltk.tokenize import RegexpTokenizer
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
