@@ -6,7 +6,6 @@ nltk
 tweepy
 #--------------------
 flask
-textblob
 tensorflow
 keras
 

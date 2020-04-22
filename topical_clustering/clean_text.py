@@ -6,9 +6,6 @@ from nltk.stem.wordnet import WordNetLemmatizer
 def clean(doc, filter = []):
     lm = WordNetLemmatizer()
     stop = set(stopwords.words('english'))
-    stop.add('western')
-    stop.add('union')
-    stop.add('westernunion')
     stop.add('username')
     stop.add('hashtag')
     stop.add('url')
@@ -27,5 +24,8 @@ def clean(doc, filter = []):
     clean_text = ''.join(ch for ch in clean_text if ch not in exclude)
     clean_text = " ".join([i for i in clean_text.lower().split() if i not in stop and len(i) > 2])
     normalized = " ".join(lm.lemmatize(word) for word in clean_text.split())
+
+    #print("words")
+    #print(normalized)
     #normalized = " ".join([i for i in clean_text.lower().split() if i not in stop and len(i) > 2 and i in english_vocab])
     return normalized

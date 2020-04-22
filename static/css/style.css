@@ -30,7 +30,12 @@ h3 {
     line-height: 30px;
 }
 
-img { max-width: 100%; }
+img {
+	max-width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
 
 ::-moz-selection { background: #e89a3e; color: #fff; text-shadow: none; }
 ::selection { background: #e89a3e; color: #fff; text-shadow: none; }
@@ -172,5 +177,9 @@ img { max-width: 100%; }
 
 #search_result{
 	text-align: left;
-    background-color: white;
+    background-color: transparent;
+}
+
+#image{	
+padding: 10px 0px;
 }
