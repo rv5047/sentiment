@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#live_tweets').onclick = () => {
          document.querySelector('#search_list').innerHTML="";
-         document.querySelector("#donutchart").innerHTML="";
+
         // Initialize new request
         const request = new XMLHttpRequest();
         const search_query = document.querySelector('#form-search').value;
@@ -29,21 +29,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update the result div
             if (data.success) {
-                google.charts.load("current", {packages:["corechart"]});
-                const d = google.visualization.arrayToDataTable([
-                        ['Sentiment', 'Number'],
-                        ['Negative', data.count[0]],
-                        ['Positive', data.count[1]],
-                        ['Neutral', data.count[2]]
-                    ]);
-
-                const options = {
-                    title: "Sentiment Wheeel",
-                    pieHole : 0.4,
+                function setAttributes(el, attrs) {
+                  for(var key in attrs) {
+                    el.setAttribute(key, attrs[key]);
+                  }
                 }
 
-                const chart = new google.visualization.PieChart(document.getElementById('donutchart'));
-                chart.draw(d, options);
+                const div = document.createElement('div');
+                const div1 = document.createElement('div');
+                const div2 = document.createElement('div');
+                const img = document.createElement('img');
+                const img1 = document.createElement('img');
+
+                div.classList.add('row');
+                div1.classList.add('col-sm-6');
+                div2.classList.add('col-sm-6');
+
+                div.setAttribute('id', 'image');
+                setAttributes(img,{'src': "./static/img/sentiment_analysis/pie.png", 'width' : '500', 'height' : '500'});
+                setAttributes(img1,{'src': "./static/img/sentiment_analysis/cloud.png", 'width' : '500', 'height' : '500'});
+
+                div1.append(img);
+                div2.append(img1);
+                div.append(div1);
+                div.append(div2);
+                document.querySelector('#search_result').append(div);
+                
+                const table = document.createElement('table');
+                tabel.setAttribute('id', 'search_list');
+                table.classList.add('table');
+                document.querySelector('#search_result').append(tabel);                
 
                 const thead = document.createElement('thead');
                 const tbody = document.createElement('tbody');
@@ -63,12 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('#search_list').append(thead);
 
                 for(var i = 0; i<data.tweets.length ; i++){
-                    /*const li = document.createElement('li');
-                    const p = document.createElement('p');
-                    p.innerHTML = data.tweets[i][0] + " : " + data.tweets[i][1];
-                    li.append(p);
-                    document.querySelector('#search_list').append(li);
-                    */
 
                     const tr = document.createElement('tr');
                     const td = document.createElement('td');
@@ -96,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#offline_tweets').onclick = () => {
          document.querySelector('#search_list').innerHTML="";
-         document.querySelector("#donutchart").innerHTML="";
+
         // Initialize new request
         const request = new XMLHttpRequest();
         const search_query = document.querySelector('#form-search').value;
@@ -123,21 +132,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update the result div
             if (data.success) {
-                google.charts.load("current", {packages:["corechart"]});
-                const d = google.visualization.arrayToDataTable([
-                        ['Sentiment', 'Number'],
-                        ['Negative', data.count[0]],
-                        ['Positive', data.count[1]],
-                        ['Neutral', data.count[2]]
-                    ]);
-
-                const options = {
-                    title: "Sentiment Wheeel",
-                    pieHole : 0.4,
+                function setAttributes(el, attrs) {
+                  for(var key in attrs) {
+                    el.setAttribute(key, attrs[key]);
+                  }
                 }
 
-                const chart = new google.visualization.PieChart(document.getElementById('donutchart'));
-                chart.draw(d, options);
+                const div = document.createElement('div');
+                const div1 = document.createElement('div');
+                const div2 = document.createElement('div');
+                const img = document.createElement('img');
+                const img1 = document.createElement('img');
+
+                div.classList.add('row');
+                div1.classList.add('col-sm-6');
+                div2.classList.add('col-sm-6');
+
+                div.setAttribute('id', 'image');
+                setAttributes(img,{'src': "./static/img/sentiment_analysis/pie.png", 'width' : '500', 'height' : '500'});
+                setAttributes(img1,{'src': "./static/img/sentiment_analysis/cloud.png", 'width' : '500', 'height' : '500'});
+
+                div1.append(img);
+                div2.append(img1);
+                div.append(div1);
+                div.append(div2);
+                document.querySelector('#search_result').append(div);
+                
+                const table = document.createElement('table');
+                tabel.setAttribute('id', 'search_list');
+                table.classList.add('table');
+                document.querySelector('#search_result').append(tabel);                
 
                 const thead = document.createElement('thead');
                 const tbody = document.createElement('tbody');
@@ -157,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('#search_list').append(thead);
 
                 for(var i = 0; i<data.tweets.length ; i++){
+
                     const tr = document.createElement('tr');
                     const td = document.createElement('td');
                     const td1 = document.createElement('td');
