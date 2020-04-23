@@ -75,11 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = JSON.parse(request.responseText);
 
-            const paths = [['./static/img/topic_clustering/cloud0.png', './static/img/topic_clustering/bar0.png'], 
-                           ['./static/img/topic_clustering/cloud1.png', './static/img/topic_clustering/bar1.png'],
-                           ['./static/img/topic_clustering/cloud2.png', './static/img/topic_clustering/bar2.png'],
-                           ['./static/img/topic_clustering/cloud3.png', './static/img/topic_clustering/bar3.png'],
-                           ['./static/img/topic_clustering/cloud4.png', './static/img/topic_clustering/bar4.png']];
+            const paths = [['../static/img/topic_clustering/cloud0.png', '../static/img/topic_clustering/bar0.png'], 
+                           ['../static/img/topic_clustering/cloud1.png', '../static/img/topic_clustering/bar1.png'],
+                           ['../static/img/topic_clustering/cloud2.png', '../static/img/topic_clustering/bar2.png'],
+                           ['../static/img/topic_clustering/cloud3.png', '../static/img/topic_clustering/bar3.png'],
+                           ['../static/img/topic_clustering/cloud4.png', '../static/img/topic_clustering/bar4.png']];
 
             if (data.success) {
                 function setAttributes(el, attrs) {
@@ -100,8 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     div2.classList.add('col-sm-6');
 
                     div.setAttribute('id', 'image');
-                    setAttributes(img,{'src': paths[i][0], 'width' : '500', 'height' : '500'});
-                    setAttributes(img1,{'src':paths[i][1], 'width' : '500', 'height' : '500'});
+                    setAttributes(img,{'src': paths[i][0]});
+                    setAttributes(img1,{'src':paths[i][1]});
 
                     div1.append(img);
                     div2.append(img1);

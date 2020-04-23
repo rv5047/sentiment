@@ -11,7 +11,6 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 import requests
 from nltk.corpus import stopwords
-from matplotlib import pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.colors as mcolors
 
@@ -169,10 +168,8 @@ class TweetCleaner():
 			'\s+':' ', # replace multi space with one single space
 		}
 		for tweet in tweets:
-			print(tweet)
 			for x,y in abbr_dict.items():
 				tweet = tweet.replace(x,y)
-			print(tweet)
 			clean_tweets.append(' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split()))
 		return clean_tweets
 	def clean_tweet(self, tweet):
@@ -202,9 +199,11 @@ class SentimentAnalyzer():
 			live_list_np = np.asarray(live_list)
 			type(live_list_np)
 
+			#print("before trained model")
 			# get score from the model
 			score = trained_model.predict(live_list_np, batch_size=1, verbose=0)
 
+			#print("after trained model")
 			single_score = np.round(np.argmax(score)/10, decimals=2) # maximum of the array i.e single band
 
 			# weighted score of top 3 bands
@@ -368,16 +367,28 @@ def live_tweets():
 	else:
 		return jsonify({"success":False})
 
+	from matplotlib import pyplot as plt
+
 	#print(len(tweets))
 	tweet_cleaner  =TweetCleaner()
 	sentiment_analyzer = SentimentAnalyzer()
+
+	#print(tweets)
+
+	#print("before score")
 
 	scores = sentiment_analyzer.analysis(loaded_model,tweets, word_idx)
 	tweets_without_stopwords = tweet_cleaner.removeStopWords(tweets)
 	#negative : 0 - 0.4
 	#neutral : 0.4 - 0.6
 	#positive : 0.6 - 1
-	
+
+	#print(tweets_without_stopwords)
+	words = ""
+
+	for string in tweets_without_stopwords:
+		words += ' ' + string
+
 	status = []
 	n_positives = int(0)
 	n_negatives = int(0)
@@ -406,8 +417,8 @@ def live_tweets():
 				stopwords = stop_words, 
 				min_font_size = 20,
 				max_words = 20,
-				colormap = 'gist_rainbow',
-				prefer_horizontal = 0.5).generate(tweets_without_stopwords) 
+				colormap = 'tab20',
+				prefer_horizontal = 0.5).generate(words) 
 					   
 	plt.figure(figsize = (8, 8), facecolor = None) 
 	plt.imshow(wordcloud) 
@@ -432,6 +443,8 @@ def offline_tweets():
 	if(len(tweets)==0):
 		return jsonify({"success":False})
 
+	from matplotlib import pyplot as plt
+
 	tweet_cleaner  =TweetCleaner()
 	sentiment_analyzer = SentimentAnalyzer()
 
@@ -440,6 +453,11 @@ def offline_tweets():
 	#negative : 0 - 0.35
 	#neutral : 0.35 - 0.65
 	#positive : 0.65 - 1
+
+	words = ""
+
+	for string in tweets_without_stopwords:
+		words += ' ' + string
 	
 	status = []
 	n_positives = int(0)
@@ -469,8 +487,8 @@ def offline_tweets():
 				stopwords = stop_words, 
 				min_font_size = 20,
 				max_words = 20,
-				colormap = 'gist_rainbow',
-				prefer_horizontal = 0.5).generate(tweets_without_stopwords) 
+				colormap = 'tab20',
+				prefer_horizontal = 0.5).generate(words) 
 					   
 	plt.figure(figsize = (8, 8), facecolor = None) 
 	plt.imshow(wordcloud) 
@@ -592,12 +610,14 @@ def topical_modeling():
 	print("training LDA started")
 	ldamodel = Lda(doc_term_matrix,num_topics=5,id2word=dictionary,alpha=0.001,passes=100,eta=0.9)
 
+	from matplotlib import pyplot as plt
+
 	cloud = WordCloud(stopwords = stop_words,
 		background_color = "cyan",
 		width = 400,
 		height = 400,
 		max_words = 10,
-		colormap = 'gist_rainbow',
+		colormap = 'tab10',
 		prefer_horizontal = 0.1)
 
 	topics = ldamodel.show_topics(num_topics=5, formatted = False, num_words=10)
@@ -639,4 +659,4 @@ def topical_modeling():
 	return jsonify({"success":True})
 
 #run flask app
-app.run(port=3000,threaded=True)
+app.run(port=3000,threaded=False)

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#live_tweets').onclick = () => {
-         document.querySelector('#search_list').innerHTML="";
+         document.querySelector('#search_result').innerHTML="";
 
         // Initialize new request
         const request = new XMLHttpRequest();
@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 div2.classList.add('col-sm-6');
 
                 div.setAttribute('id', 'image');
-                setAttributes(img,{'src': "./static/img/sentiment_analysis/pie.png", 'width' : '500', 'height' : '500'});
-                setAttributes(img1,{'src': "./static/img/sentiment_analysis/cloud.png", 'width' : '500', 'height' : '500'});
+                setAttributes(img,{'src': "./static/img/sentiment_analysis/pie.png"});
+                setAttributes(img1,{'src': "./static/img/sentiment_analysis/cloud.png"});
 
                 div1.append(img);
                 div2.append(img1);
@@ -56,9 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('#search_result').append(div);
                 
                 const table = document.createElement('table');
-                tabel.setAttribute('id', 'search_list');
-                table.classList.add('table');
-                document.querySelector('#search_result').append(tabel);                
+                table.setAttribute('id', 'search_list');
+                table.classList.add('table');               
 
                 const thead = document.createElement('thead');
                 const tbody = document.createElement('tbody');
@@ -75,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.append(th2);
 
                 thead.append(tr);
-                document.querySelector('#search_list').append(thead);
+                table.append(thead);
 
                 for(var i = 0; i<data.tweets.length ; i++){
 
@@ -93,7 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     tbody.append(tr);
                 }
-                document.querySelector('#search_list').append(tbody);
+                table.append(tbody);
+                document.querySelector('#search_result').append(table);
             }
             else {
                 window.alert("Check your Internet Connection !!!")
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.querySelector('#offline_tweets').onclick = () => {
-         document.querySelector('#search_list').innerHTML="";
+         document.querySelector('#search_result').innerHTML="";
 
         // Initialize new request
         const request = new XMLHttpRequest();
@@ -149,8 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 div2.classList.add('col-sm-6');
 
                 div.setAttribute('id', 'image');
-                setAttributes(img,{'src': "./static/img/sentiment_analysis/pie.png", 'width' : '500', 'height' : '500'});
-                setAttributes(img1,{'src': "./static/img/sentiment_analysis/cloud.png", 'width' : '500', 'height' : '500'});
+                setAttributes(img,{'src': "./static/img/sentiment_analysis/pie.png"});
+                setAttributes(img1,{'src': "./static/img/sentiment_analysis/cloud.png"});
 
                 div1.append(img);
                 div2.append(img1);
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('#search_result').append(div);
                 
                 const table = document.createElement('table');
-                tabel.setAttribute('id', 'search_list');
+                table.setAttribute('id', 'search_list');
                 table.classList.add('table');
                 document.querySelector('#search_result').append(tabel);                
 
