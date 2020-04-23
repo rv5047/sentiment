@@ -180,43 +180,27 @@ class TweetCleaner():
 class SentimentAnalyzer():
 	def analysis(self,trained_model, tweets, word_idx):
 		sentiment_score = []
+		tweet_length = len(tweets)
+		live_list = []
+		scores = []
+		tokenizer = RegexpTokenizer(r'\w+')
 		for data in tweets:
-			live_list = []
-			live_list_np = np.zeros((56,1))
-			# split the sentence into its words and remove any punctuations.
-			tokenizer = RegexpTokenizer(r'\w+')
 			data_sample_list = tokenizer.tokenize(data)
-
-			# get index for the live stage
 			data_index = np.array([word_idx[word.lower()] if word.lower() in word_idx else 0 for word in data_sample_list])
-			data_index_np = np.array(data_index)
-
-			# padded with zeros of length 56 i.e maximum length
-			padded_array = np.zeros(56) # use the def maxSeqLen(training_data) function to detemine the padding length for your data
-			padded_array[: data_index_np.shape[0]] = data_index_np
-			data_index_np_pad = padded_array.astype(int)
-			live_list.append(data_index_np_pad)
-			live_list_np = np.asarray(live_list)
-			type(live_list_np)
-
-			#print("before trained model")
-			# get score from the model
-			score = trained_model.predict(live_list_np, batch_size=1, verbose=0)
-
-			#print("after trained model")
-			single_score = np.round(np.argmax(score)/10, decimals=2) # maximum of the array i.e single band
-
-			# weighted score of top 3 bands
-			top_3_index = np.argsort(score)[0][-3:]
-
-			top_3_scores = score[0][top_3_index]
-
+			data_index_np = np.asarray(data_index)
+			padded_array = np.zeros(56)
+			padded_array[:len(data_index)] = data_index_np
+			live_list.append(padded_array)
+		live_list_np = np.asarray(live_list)
+		score = trained_model.predict(live_list_np, batch_size=tweet_length, verbose=0)
+		#print(score)
+		for sc in score:
+			top_3_index = np.argsort(sc)[-3:]
+			top_3_scores = sc[top_3_index]
 			top_3_weights = top_3_scores/np.sum(top_3_scores)
-
 			single_score_dot = np.round(np.dot(top_3_index, top_3_weights)/10, decimals = 2)
-
-			sentiment_score.append(single_score_dot)
-		return sentiment_score
+			scores.append(single_score_dot)
+		return scores
 
 """
 twitter_client = TwitterClient()
@@ -377,7 +361,7 @@ def live_tweets():
 
 	#print("before score")
 
-	scores = sentiment_analyzer.analysis(loaded_model,tweets, word_idx)
+	scores = sentiment_analyzer.analysis(loaded_model, tweets, word_idx)
 	tweets_without_stopwords = tweet_cleaner.removeStopWords(tweets)
 	#negative : 0 - 0.4
 	#neutral : 0.4 - 0.6
