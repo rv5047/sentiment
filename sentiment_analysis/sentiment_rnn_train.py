@@ -15,24 +15,18 @@ from keras.models import model_from_json
 from keras.models import load_model
 from nltk.tokenize import RegexpTokenizer
 
-def load_data_all(data_dir, all_data_path,pred_path, gloveFile, first_run, load_all):
-
-    # Load embeddings for the filtered glove list
-    if load_all == True:
-        weight_matrix, word_idx = uf.load_embeddings(gloveFile)
-    else:
-        weight_matrix, word_idx = uf.load_embeddings(filtered_glove_path)
-
+def load_data_all(data_dir, all_data_path, gloveFile):
+    weight_matrix, word_idx = uf.load_embeddings(gloveFile)
     len(word_idx)
     len(weight_matrix)
 
     #%%
     # create test, validation and trainng data
     all_data = uf.read_data(all_data_path)
-    train_data, test_data, dev_data = uf.training_data_split(all_data, 0.8, data_dir)
+    train_data, test_data, val_data = uf.training_data_split(all_data, 0.8, data_dir)
 
     train_data = train_data.reset_index()
-    dev_data = dev_data.reset_index()
+    val_data = val_data.reset_index()
     test_data = test_data.reset_index()
 
     #%%
@@ -44,16 +38,13 @@ def load_data_all(data_dir, all_data_path,pred_path, gloveFile, first_run, load_
      # load Training data matrix
     train_x = uf.tf_data_pipeline_nltk(train_data, word_idx, weight_matrix, maxSeqLength)
     test_x = uf.tf_data_pipeline_nltk(test_data, word_idx, weight_matrix, maxSeqLength)
-    val_x = uf.tf_data_pipeline_nltk(dev_data, word_idx, weight_matrix, maxSeqLength)
+    val_x = uf.tf_data_pipeline_nltk(val_data, word_idx, weight_matrix, maxSeqLength)
 
     #%%
     # load labels data matrix
     train_y = uf.labels_matrix(train_data)
-    val_y = uf.labels_matrix(dev_data)
+    val_y = uf.labels_matrix(val_data)
     test_y = uf.labels_matrix(test_data)
-
-
-     #%%
 
     # summarize size
     print("Training data: ")
@@ -97,89 +88,30 @@ def train_model(model,train_x, train_y, test_x, test_y, val_x, val_y, batch_size
 
     return model
 
-def live_test(trained_model, data, word_idx):
-
-    #data = "Pass the salt"
-    #data_sample_list = data.split()
-
-    sentiment_score = []
-    live_list = []
-    live_list_np = np.zeros((56,1))
-    # split the sentence into its words and remove any punctuations.
-    tokenizer = RegexpTokenizer(r'\w+')
-    labels = np.array(['1','2','3','4','5','6','7','8','9','10'], dtype = "int")
-    data_sample_list = tokenizer.tokenize(data)
-
-    #word_idx['I']
-    # get index for the live stage
-    data_index = np.array([word_idx[word.lower()] if word.lower() in word_idx else 0 for word in data_sample_list])
-    data_index_np = np.array(data_index)
-
-    # padded with zeros of length 56 i.e maximum length
-    padded_array = np.zeros(56) # use the def maxSeqLen(training_data) function to detemine the padding length for your data
-    padded_array[:data_index_np.shape[0]] = data_index_np
-    data_index_np_pad = padded_array.astype(int)
-    live_list.append(data_index_np_pad)
-    live_list_np = np.asarray(live_list)
-    type(live_list_np)
-
-    # get score from the model
-    score = trained_model.predict(live_list_np, batch_size=1, verbose=0)
-    #print (score)
-
-    single_score = np.round(np.argmax(score)/10, decimals=2) # maximum of the array i.e single band
-
-    # weighted score of top 3 bands
-    top_3_index = np.argsort(score)[0][-3:]
-    top_3_scores = score[0][top_3_index]
-    top_3_weights = top_3_scores/np.sum(top_3_scores)
-    single_score_dot = np.round(np.dot(top_3_index, top_3_weights)/10, decimals = 2)
-
-    #print (single_score)
-    
-    return single_score_dot
-
 def main():
 
     max_words = 56 # max no of words in your training data
     batch_size = 2000 # batch size for training
     EMBEDDING_DIM = 100 # size of the word embeddings
-    train_flag = True # set True if in training mode else False if in prediction mode
 
-    if train_flag:
-        # create training, validataion and test data sets
-        # load the dataset
-        path = ''
-        data_dir = path+'Data'
-        all_data_path = path+'Data/'
-        pred_path = path+'Data/output_model/test_pred.csv'
-        gloveFile = path+'Data/glove/glove_6B_100d.txt'
-        first_run = False
-        load_all = True
+    # load the dataset
+    path = ''
+    data_dir = path+'Data'
+    all_data_path = path+'Data/'
+    gloveFile = path+'Data/glove/glove_6B_100d.txt'
 
-        print('variables SET')
-        print('calling load data all')
-        train_x, train_y, test_x, test_y, val_x, val_y, weight_matrix, word_idx = load_data_all(data_dir, all_data_path,pred_path, gloveFile, first_run, load_all)
-        print('completed load_data_all')
-        # create model strucutre
-        model = create_model_rnn(weight_matrix, max_words, EMBEDDING_DIM)
+    print('variables SET')
+    print('calling load data all')
+    train_x, train_y, test_x, test_y, val_x, val_y, weight_matrix, word_idx = load_data_all(data_dir, all_data_path, gloveFile)
+    print('completed load_data_all')
+    # create model strucutre
+    model = create_model_rnn(weight_matrix, max_words, EMBEDDING_DIM)
 
-        # train the model
-        trained_model =train_model(model,train_x, train_y, test_x, test_y, val_x, val_y, batch_size, path)   # run model live
+    # train the model
+    trained_model =train_model(model,train_x, train_y, test_x, test_y, val_x, val_y, batch_size, path)   # run model live
 
 
-        # serialize weights to HDF5
-        model.save_weights(path+"model/best_model.h5")
-        print("Saved model to disk")
-
-    else:
-        path=''
-        gloveFile = path+'Data/glove/glove_6B_100d.txt'
-        weight_matrix, word_idx = uf.load_embeddings(gloveFile)
-        weight_path = path +'model/best_model.hdf5'
-        loaded_model = load_model(weight_path)
-        loaded_model.summary()
-        sample_data = 'worst product'
-        result = live_test(loaded_model,sample_data, word_idx)
-        print (result)
+    # serialize weights to HDF5
+    model.save_weights(path+"model/best_model.h5")
+    print("Saved model to disk")
 main()
