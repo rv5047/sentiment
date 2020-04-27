@@ -7,7 +7,7 @@ from hashtags import gethashtags
 
 import gensim
 import json
-from gensim import corpora
+from gensim import corpora, models
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import scale
@@ -20,9 +20,11 @@ from nltk.corpus import stopwords
 stop_words = stopwords.words("english")
 from collections import Counter
 
+"""
 tfidf = joblib.load(r'./model/tfidf_model.pkl')
 tweet_w2v = gensim.models.word2vec.Word2Vec.load(r'./model/w2v_model')
-linearsvm_model = './model/linearsvm_model.pkl'
+#linearsvm_model = './model/linearsvm_model.pkl'
+"""
 
 tweets_data = []
 n_dim = 200
@@ -42,12 +44,13 @@ twitter_df = twitter_df[twitter_df.text.str.startswith('RT ')==False]
 twitter_df = twitter_df[twitter_df.text.str.startswith('FAV ')==False]
 twitter_df = twitter_df[twitter_df.text.str.contains('mPLUS')==False]
 twitter_df = twitter_df.rename(columns = {'text':'SentimentText'})
-twitter_df['hashtags'] = twitter_df.apply(gethashtags, axis=1)
+#twitter_df['hashtags'] = twitter_df.apply(gethashtags, axis=1)
 print("Basic DF processing completed")
 
 twitter_df['tokens'] = twitter_df['SentimentText'].map(tokenize)
 print("tokenization is completed")
 
+"""
 x_text = np.array(twitter_df.tokens)
 x_text = labelizeTweets(x_text, 'ACTUAL')
 
@@ -59,24 +62,33 @@ df = capture_sentiment(twitter_df, tweet_vecs, linearsvm_model)
 
 df_pos = df[df['Sentiment']==1]
 df_neg = df[df['Sentiment']==0]
+"""
 
-documents = list(df_pos['SentimentText'])
+documents = list(twitter_df['SentimentText'])
 doc_clean = [clean(doc).split() for doc in documents]
 print("documents are cleaned")
 
 # Creating the term dictionary of our corpus, where every unique term is assigned an index.
 dictionary = corpora.Dictionary(doc_clean)
-dictionary.filter_extremes()
+dictionary.filter_extremes(no_below=15, no_above=0.5, keep_n=100000)
 
 # Converting list of documents (corpus) into Document Term Matrix using dictionary prepared above.
 doc_term_matrix = [dictionary.doc2bow(doc) for doc in doc_clean]
+
+print(doc_term_matrix)
+
+tfidf = models.TfidfModel(doc_term_matrix)
+tfidf_corpus = tfidf[doc_term_matrix]
+
+print("tfidf")
+print(tfidf_corpus)
 
 # Creating the object for LDA model using gensim library
 Lda = gensim.models.ldamodel.LdaModel
 
 # Running and Training LDA model on the document term matrix.
 print("training LDA started")
-ldamodel = Lda(doc_term_matrix,num_topics=5,id2word=dictionary,alpha=0.001,passes=100,eta=0.9)
+ldamodel = Lda(tfidf_corpus,num_topics=5,id2word=dictionary,alpha=0.001,passes=100,eta=0.9)
 
 cloud = WordCloud(stopwords = stop_words,
 	background_color = "cyan",
@@ -116,7 +128,7 @@ for i in range(0,5):
 	ax_twin = ax.twinx()
 	ax_twin.bar(x='word', height="importance", data=dataf.loc[dataf.topic_id==i, :], color="red", width=0.2, label='Weights')
 	ax.set_ylabel('Word Count', color="red")
-	ax_twin.set_ylim(0, 0.2); ax.set_ylim(0, 50)
+	ax_twin.set_ylim(0, 0.3); ax.set_ylim(0, 200)
 	ax.tick_params(axis='y', left=False)
 	ax.set_xticklabels(dataf.loc[dataf.topic_id==i, 'word'], rotation=30, horizontalalignment= 'right')
 	ax.legend(loc='upper left'); ax_twin.legend(loc='upper right')

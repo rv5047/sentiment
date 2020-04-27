@@ -26,6 +26,8 @@ corpus = [x.words for x in x_train]
 print("Training TF-IDF vector")
 vectorizer = TfidfVectorizer(analyzer=lambda x: x, min_df=100)
 matrix = vectorizer.fit_transform(corpus)
+
+print(matrix)
 tfidf = dict(zip(vectorizer.get_feature_names(), vectorizer.idf_))
 
 joblib.dump(tfidf,'tfidf_model.pkl')

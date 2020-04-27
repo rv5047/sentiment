@@ -34,7 +34,7 @@ from topical_clustering.hashtags import gethashtags
 import joblib
 import gensim
 import json
-from gensim import corpora
+from gensim import corpora, models
 from sklearn.preprocessing import scale
 import os
 from collections import Counter
@@ -397,7 +397,7 @@ def live_tweets():
 	plt.savefig("./static/img/sentiment_analysis/pie.png")
 
 	wordcloud = WordCloud(width = 400, height = 400, 
-				background_color ='cyan', 
+				background_color ='white', 
 				stopwords = stop_words, 
 				min_font_size = 20,
 				max_words = 20,
@@ -467,7 +467,7 @@ def offline_tweets():
 	plt.savefig("./static/img/sentiment_analysis/pie.png")
 
 	wordcloud = WordCloud(width = 400, height = 400, 
-				background_color ='cyan', 
+				background_color ='white', 
 				stopwords = stop_words, 
 				min_font_size = 20,
 				max_words = 20,
@@ -564,35 +564,26 @@ def topical_modeling():
 	twitter_df['tokens'] = twitter_df['SentimentText'].map(tokenize)
 	print("tokenization is completed")
 
-	x_text = np.array(twitter_df.tokens)
-	x_text = labelizeTweets(x_text, 'ACTUAL')
-
-	tweet_vecs = np.concatenate([buildWordVector(z, n_dim, tfidf, tweet_w2v) for z in map(lambda x: x.words, x_text)])
-	tweet_vecs = scale(tweet_vecs)
-	print("word vectors are created")
-
-	df = capture_sentiment(twitter_df, tweet_vecs, linearsvm_model)
-
-	df_pos = df[df['Sentiment']==1]
-	df_neg = df[df['Sentiment']==0]
-
-	documents = list(df_pos['SentimentText'])
+	documents = list(twitter_df['SentimentText'])
 	doc_clean = [clean(doc).split() for doc in documents]
 	print("documents are cleaned")
 
 	# Creating the term dictionary of our corpus, where every unique term is assigned an index.
 	dictionary = corpora.Dictionary(doc_clean)
-	dictionary.filter_extremes()
+	dictionary.filter_extremes(no_below=15, no_above=0.5, keep_n=100000)
 
 	# Converting list of documents (corpus) into Document Term Matrix using dictionary prepared above.
 	doc_term_matrix = [dictionary.doc2bow(doc) for doc in doc_clean]
+
+	tfidf = models.TfidfModel(doc_term_matrix)
+	tfidf_corpus = tfidf[doc_term_matrix]
 
 	# Creating the object for LDA model using gensim library
 	Lda = gensim.models.ldamodel.LdaModel
 
 	# Running and Training LDA model on the document term matrix.
 	print("training LDA started")
-	ldamodel = Lda(doc_term_matrix,num_topics=5,id2word=dictionary,alpha=0.001,passes=100,eta=0.9)
+	ldamodel = Lda(tfidf_corpus,num_topics=5,id2word=dictionary,alpha=0.001,passes=100,eta=0.9)
 
 	from matplotlib import pyplot as plt
 
@@ -634,7 +625,7 @@ def topical_modeling():
 		ax_twin = ax.twinx()
 		ax_twin.bar(x='word', height="importance", data=dataf.loc[dataf.topic_id==i, :], color="red", width=0.2, label='Weights')
 		ax.set_ylabel('Word Count', color="red")
-		ax_twin.set_ylim(0, 0.2); ax.set_ylim(0, 100)
+		ax_twin.set_ylim(0, 0.3); ax.set_ylim(0, 200)
 		ax.tick_params(axis='y', left=False)
 		ax.set_xticklabels(dataf.loc[dataf.topic_id==i, 'word'], rotation=30, horizontalalignment= 'right')
 		ax.legend(loc='upper left'); ax_twin.legend(loc='upper right')

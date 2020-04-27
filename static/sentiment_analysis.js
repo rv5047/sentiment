@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     };
 
+//offline tweets
+
     document.querySelector('#offline_tweets').onclick = () => {
          document.querySelector('#search_result').innerHTML="";
 
@@ -126,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Callback function for when request completes
         request.onload = () => {
+
 
             // Extract JSON data from request
             const data = JSON.parse(request.responseText);
@@ -160,8 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const table = document.createElement('table');
                 table.setAttribute('id', 'search_list');
-                table.classList.add('table');
-                document.querySelector('#search_result').append(tabel);                
+                table.classList.add('table');               
 
                 const thead = document.createElement('thead');
                 const tbody = document.createElement('tbody');
@@ -178,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.append(th2);
 
                 thead.append(tr);
-                document.querySelector('#search_list').append(thead);
+                table.append(thead);
 
                 for(var i = 0; i<data.tweets.length ; i++){
 
@@ -196,7 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     tbody.append(tr);
                 }
-                document.querySelector('#search_list').append(tbody);
+                table.append(tbody);
+                document.querySelector('#search_result').append(table);
             }
             else {
                 window.alert("No Tweet Found !!!");

@@ -11,7 +11,7 @@ from labelizeTweets import labelizeTweets
 from tweet_tokenize import tokenize
 
 # Get the file into a DF for training
-file = r"./Data/SentimentAnalysisDataset.csv"
+file = r"../Data/SentimentAnalysisDataset.csv"
 df = ingest(file)
 print("File received and processed into dataframe")
 
@@ -29,16 +29,30 @@ tweet_w2v = gensim.models.word2vec.Word2Vec.load(r'./w2v_model')
 
 def buildWordVector(tokens, size):
     vec = np.zeros(size).reshape((1, size))
+
+    print(vec)
     count = 0.
     for word in tokens:
         try:
             vec += tweet_w2v[word].reshape((1, size)) * tfidf[word]
+            """
+            print("tfidf")
+            print(tfidf[word])
+            print("w2v")
+            print(tweet_w2v[word])
+            print("vec")
+            print(vec)
+            """
             count += 1.
         except KeyError: # handling the case where the token is not
                          # in the corpus. useful for testing.
             continue
     if count != 0:
         vec /= count
+        """
+        print("/count")
+        print(vec)
+        """
     return vec
 
 
@@ -59,8 +73,15 @@ classifier = LinearSVC()
 classifier.fit(train_vecs_w2v, y_train[0:800000])
 print("SVM training complete")
 
-y_test_pred = classifier.predict(test_vecs_w2v)
+#y_test_pred = classifier.predict(test_vecs_w2v)
 print(classifier.score(test_vecs_w2v, y_test[0:200000]))
 
 with open('linearsvm_model.pkl','wb') as f:
     pickle.dump(classifier, f)
+
+"""
+tokens = ["cat", "bat", "fat", "mat", "fuck"]
+vec = buildWordVector(tokens, 200)
+print("vec2")
+print(vec)
+"""
